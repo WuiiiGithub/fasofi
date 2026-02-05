@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fasofi - Minimalist Focus</title>
+    
+    <!-- Favicon: SVG Bookmark -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'></path></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    
+    <!-- Firebase SDKs -->
+    <script src="/__/firebase/11.0.0/firebase-app-compat.js"></script>
+    <script src="/__/firebase/11.0.0/firebase-analytics-compat.js"></script>
+    <!-- Initialize Firebase -->
+    <script src="/__/firebase/init.js?useEmulator=true"></script>
+
+    <link rel="stylesheet" href="./css/timer.css">
+</head>
+<body id="body">
+
+    <div id="touchSurface"></div>
+    <div id="swipeToast"></div>
+
+    <!-- Brand Header -->
+    <div class="brand-container">
+        <div class="logo-mark">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+        </div>
+        <div class="brand-name">Fasofi</div>
+    </div>
+
+    <div class="side-nav">
+        <button id="btnTimer" class="nav-btn active" title="Timer Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </button>
+        <button id="btnStopwatch" class="nav-btn" title="Stopwatch Mode">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m9 2 6 0"/><path d="M12 12v-4"/></svg>
+        </button>
+    </div>
+
+    <div class="text-center relative pointer-events-none">
+        <div id="display" class="timer-display mono select-none">01:00</div>
+        <div id="modeLabel" class="text-dim text-sm tracking-widest uppercase mt-4 opacity-40">Focus Session</div>
+    </div>
+
+    <button id="btnSettings" class="nav-btn settings-btn" title="Settings">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></svg>
+    </button>
+
+    <div class="controls-hint select-none">
+        <kbd>Space</kbd> Start/Stop &nbsp;&bull;&nbsp; <kbd>Del</kbd> Reset &nbsp;&bull;&nbsp; <kbd>Esc</kbd> Stop Alarm
+    </div>
+
+    <div id="settingsModal" class="modal fixed inset-0 flex items-center justify-center p-6">
+        <div class="bg-[#1a1a1e] border border-white/10 p-8 rounded-3xl w-full max-w-sm shadow-2xl" onclick="event.stopPropagation()">
+            <h2 class="text-xl font-semibold mb-6">Fasofi Settings</h2>
+            <div class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs text-dim mb-2 uppercase tracking-wider">Minutes</label>
+                        <input type="number" id="inputMinutes" value="1" min="0" max="999" 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 mono text-lg">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs text-dim mb-2 uppercase tracking-wider">Seconds</label>
+                        <input type="number" id="inputSeconds" value="0" min="0" max="59" 
+                            class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 focus:outline-none focus:border-indigo-500 mono text-lg">
+                    </div>
+                </div>
+                <button id="saveSettings" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-medium py-3 rounded-xl transition-colors mt-4">
+                    Apply Changes
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/__/firebase/11.0.0/firebase-app-compat.js"></script>
+    <script src="/__/firebase/11.0.0/firebase-analytics-compat.js"></script>
+    <script src="/__/firebase/init.js?useEmulator=true"></script>
+    <script src="./js/timer.js"></script>
+</body>
+</html>

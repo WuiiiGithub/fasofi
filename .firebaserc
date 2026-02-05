@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "wuiiihub"
+  },
+  "targets": {
+    "wuiiihub": {
+      "hosting": {
+        "fasofi": [
+          "fasofi"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

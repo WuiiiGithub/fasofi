@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - The Lost Library | Fasofi</title>
+    
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%236366f1'><path d='M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z'></path></svg>">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Crimson+Pro:wght@900&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #010102;
+            --accent-color: #6366f1;
+        }
+
+        body, html {
+            margin: 0; padding: 0;
+            width: 100%; height: 100%;
+            background-color: var(--bg-color);
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        #canvas-container {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            z-index: 1;
+            cursor: none;
+        }
+
+        .ui-layer {
+            position: relative;
+            z-index: 10;
+            pointer-events: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem;
+        }
+
+        .brand-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            pointer-events: auto;
+        }
+
+        .logo-mark {
+            width: 40px; height: 40px;
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 8px;
+            display: flex; align-items: center; justify-content: center;
+            backdrop-filter: blur(5px);
+        }
+
+        .overlay-text {
+            position: absolute;
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .error-code {
+            font-family: 'Crimson Pro', serif;
+            font-size: 14rem;
+            font-weight: 900;
+            line-height: 1;
+            opacity: 0.02;
+            letter-spacing: -0.05em;
+        }
+
+        .footer-card {
+            max-width: 450px;
+            pointer-events: auto;
+            background: rgba(5, 5, 8, 0.6);
+            backdrop-filter: blur(25px);
+            padding: 2rem;
+            border-radius: 20px;
+            border: 1px solid rgba(255,255,255,0.03);
+            margin-bottom: 2vh;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            transform: translateY(20px);
+            opacity: 0;
+        }
+
+        .btn-action {
+            display: inline-block;
+            margin-top: 1.5rem;
+            padding: 0.8rem 2rem;
+            background: #6366f1;
+            color: white;
+            border-radius: 10px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: 0.3s;
+        }
+
+        .btn-action:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+
+        #custom-cursor {
+            position: fixed;
+            width: 120px; height: 120px;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.12) 0%, rgba(99, 102, 241, 0) 75%);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 100;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+            opacity: 0;
+            transition: opacity 1.2s ease;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="custom-cursor"></div>
+
+    <div id="canvas-container"></div>
+
+    <div class="overlay-text">
+        <div class="error-code">404</div>
+    </div>
+
+    <div class="ui-layer">
+        <div class="brand-header">
+            <div class="logo-mark">
+                <!-- Bookmark Logo -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#818cf8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/></svg>
+            </div>
+            <span class="font-bold tracking-tight text-xl text-slate-200">Fasofi</span>
+        </div>
+
+        <div id="footer-card" class="footer-card">
+            <h2 class="text-2xl font-bold mb-2">The Volume is Missing</h2>
+            <p class="text-slate-400 text-sm leading-relaxed">
+                You wander through the Great Library of Fasofi, but the record you seek has been misplaced or never written. Use your light to find your way back.
+            </p>
+            <a href="/" class="btn-action">Return to Index</a>
+        </div>
+    </div>
+
+    <script>
+        let scene, camera, renderer, flashlight, bulb;
+        let mouseX = 0, mouseY = 0;
+        let lightStarted = false;
+        const container = document.getElementById('canvas-container');
+        const cursor = document.getElementById('custom-cursor');
+
+        function init() {
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x010102, 0.22);
+
+            camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 0.5, 7);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            scene.add(new THREE.AmbientLight(0x404040, 0.03));
+
+            flashlight = new THREE.SpotLight(0xffffff, 0, 20, Math.PI / 12, 0.9, 1.1);
+            flashlight.position.set(0, 0, 5);
+            flashlight.castShadow = true;
+            flashlight.shadow.mapSize.width = 1024;
+            flashlight.shadow.mapSize.height = 1024;
+            scene.add(flashlight);
+            
+            bulb = new THREE.PointLight(0x6366f1, 0, 12);
+            flashlight.add(bulb);
+
+            createLibrary();
+            animate();
+            
+            gsap.to("#footer-card", { opacity: 1, y: 0, duration: 1.5, delay: 0.8 });
+        }
+
+        function createLibrary() {
+            const shelfMaterial = new THREE.MeshStandardMaterial({ color: 0x050302, roughness: 1 });
+
+            for (let shelfY = -8; shelfY <= 8; shelfY += 2.4) {
+                const shelf = new THREE.Mesh(new THREE.BoxGeometry(30, 0.1, 5), shelfMaterial);
+                shelf.position.y = shelfY - 0.5;
+                shelf.position.z = -1.2;
+                shelf.receiveShadow = true;
+                scene.add(shelf);
+
+                const shelfWidth = 22;
+                let currentX = -shelfWidth / 2;
+
+                while (currentX < shelfWidth / 2) {
+                    const bWidth = 0.14 + Math.random() * 0.35;
+                    const bHeight = 1.4 + Math.random() * 0.8;
+                    const bDepth = 1.8 + Math.random() * 0.7;
+                    
+                    const book = createAestheticBook(bWidth, bHeight, bDepth);
+                    book.position.set(currentX + bWidth / 2, shelfY + bHeight / 2 - 0.5, -1);
+                    
+                    if (Math.random() > 0.82) {
+                        book.rotation.z = (Math.random() - 0.5) * 0.4;
+                    }
+
+                    scene.add(book);
+                    currentX += bWidth + 0.04;
+                }
+            }
+        }
+
+        function createAestheticBook(w, h, d) {
+            const group = new THREE.Group();
+            const colors = [0x3b0a0a, 0x0f172a, 0x064e3b, 0x271706, 0x0a0a0a, 0x1e1b4b, 0x422006];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+
+            // Main Spine
+            const spine = new THREE.Mesh(
+                new THREE.BoxGeometry(w, h, d),
+                new THREE.MeshStandardMaterial({ color: color, roughness: 0.85 })
+            );
+            spine.castShadow = true;
+            spine.receiveShadow = true;
+            group.add(spine);
+
+            const goldMat = new THREE.MeshStandardMaterial({ 
+                color: 0x926c15, 
+                metalness: 0.95, 
+                roughness: 0.1 
+            });
+
+            // Glowy Strips (Magic Rune Books)
+            if (Math.random() > 0.85) {
+                const runeGeom = new THREE.BoxGeometry(w + 0.02, 0.04, d + 0.02);
+                const runeMat = new THREE.MeshStandardMaterial({ 
+                    color: 0x818cf8, 
+                    emissive: 0x4f46e5, 
+                    emissiveIntensity: 2
+                });
+                const rune = new THREE.Mesh(runeGeom, runeMat);
+                rune.position.y = (Math.random() - 0.5) * h * 0.6;
+                group.add(rune);
+            }
+
+            // Bookmarks
+            if (Math.random() > 0.75) {
+                const silkColor = [0x991b1b, 0x1e40af, 0xd97706][Math.floor(Math.random()*3)];
+                const bookmark = new THREE.Mesh(
+                    new THREE.BoxGeometry(w * 0.2, h * 0.4, 0.02),
+                    new THREE.MeshStandardMaterial({ color: silkColor, roughness: 0.5 })
+                );
+                // Hang from the top front
+                bookmark.position.set(0, h * 0.4, d / 2 + 0.01);
+                group.add(bookmark);
+            }
+
+            // Decorative gold bands
+            const bandCount = 1 + Math.floor(Math.random() * 4);
+            for (let i = 0; i < bandCount; i++) {
+                const band = new THREE.Mesh(new THREE.BoxGeometry(w + 0.01, 0.02, d + 0.015), goldMat);
+                band.position.y = (i / (bandCount) - 0.5) * h * 0.9;
+                group.add(band);
+            }
+
+            return group;
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            const targetX = (mouseX * 18);
+            const targetY = -(mouseY * 12);
+            
+            flashlight.target.position.set(targetX, targetY, -3);
+            flashlight.target.updateMatrixWorld();
+            
+            flashlight.position.x += (mouseX * 3 - flashlight.position.x) * 0.12;
+            flashlight.position.y += (-(mouseY * 3) - flashlight.position.y) * 0.12;
+
+            camera.position.x += (mouseX * 0.6 - camera.position.x) * 0.03;
+            camera.position.y += (-(mouseY * 0.6) - camera.position.y) * 0.03;
+            camera.lookAt(0, 0, 0);
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('mousemove', (e) => {
+            mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+            mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+            
+            if (!lightStarted) {
+                lightStarted = true;
+                gsap.to(flashlight, { intensity: 4, duration: 2.5 });
+                gsap.to(bulb, { intensity: 0.8, duration: 2.5 });
+                cursor.style.opacity = '1';
+            }
+
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        init();
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+:root {
+    --bg-color: #0a0a0c;
+    --accent-color: #6366f1;
+    --alarm-color: #ef4444;
+    --text-main: #f8fafc;
+    --text-dim: #94a3b8;
+}
+
+* {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-family: 'Inter', sans-serif;
+    overflow: hidden;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.5s ease;
+    touch-action: none;
+}
+
+/* Branding & Logo CSS */
+.brand-container {
+    position: fixed;
+    top: 1.5rem;
+    left: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    z-index: 60;
+}
+
+.logo-mark {
+    width: 32px;
+    height: 32px;
+    background: var(--accent-color);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+}
+
+.logo-mark svg {
+    color: white;
+    width: 20px;
+    height: 20px;
+}
+
+.brand-name {
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    font-size: 1.25rem;
+    background: linear-gradient(to right, #fff, #94a3b8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.alarm-active {
+    background-color: #1a0505;
+}
+
+.mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.side-nav {
+    position: fixed;
+    top: 1.5rem;
+    right: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    z-index: 60;
+}
+
+.nav-btn {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 0.75rem;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+@media (min-width: 768px) {
+    .nav-btn:hover {
+background: rgba(255, 255, 255, 0.1);
+transform: translateY(-2px);
+    }
+}
+
+.nav-btn.active {
+    border-color: var(--accent-color);
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-color);
+}
+
+.settings-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 60;
+}
+
+.modal {
+    background: rgba(10, 10, 12, 0.85);
+    backdrop-filter: blur(20px);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 100;
+}
+
+.modal.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.timer-display {
+    font-size: clamp(4rem, 25vw, 15rem);
+    font-weight: 700;
+    letter-spacing: -0.05em;
+    transition: transform 0.3s ease, color 0.3s ease;
+    position: relative;
+    z-index: 10;
+}
+
+.running {
+    text-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+    animation: pulse 2s infinite;
+}
+
+.alarm-text {
+    color: var(--alarm-color);
+    text-shadow: 0 0 50px rgba(239, 68, 68, 0.5);
+    animation: shake 0.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+}
+
+.controls-hint {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 1.5rem;
+    color: var(--text-dim);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    opacity: 0.6;
+}
+
+kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: inherit;
+}
+
+#touchSurface {
+    position: fixed;
+    inset: 0;
+    z-index: 5;
+    cursor: pointer;
+}
+
+#swipeToast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    padding: 0.5rem 1rem;
+    border-radius: 99px;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+    z-index: 20;
+}
+
+@media (max-width: 640px) {
+    .controls-hint {
+display: none;
+    }
+}
